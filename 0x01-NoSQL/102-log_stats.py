@@ -21,6 +21,6 @@ if __name__ == "__main__":
             {'$sort': {'count': -1}},
             {'$limit': 10}
     ]
-    popular = list(nginx_logs.aggregate(pipe))
+    popular = list(logs.aggregate(pipe))
     for ip in popular:
         print('\t{}: {}'.format(ip['_id'], ip['count']))
