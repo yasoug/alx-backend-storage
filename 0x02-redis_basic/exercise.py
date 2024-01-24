@@ -1,8 +1,22 @@
 #!/usr/bin/env python3
 """Module for the Redis NoSQL data storage"""
-from typing import Union, Callable
+from typing import Union, Callable, Any
 import redis
 from uuid import uuid4
+from functools import wraps
+
+
+def count_calls(method: Callable) -> Callable:
+    """Track the number of calls made to a class method"""
+    key = method.__qualname__
+
+    @wraps(method)
+    def wrapper(self: Any, *args: Any, **kwargs: Any) -> Any:
+        """It returns the given method after incrementing its call counter"""
+        self._redis.incr(key)
+        return method(self, *args, **kwargs)
+
+    return wrapper
 
 
 class Cache:
@@ -12,6 +26,7 @@ class Cache:
         self._redis = redis.Redis()
         self._redis.flushdb()
 
+    @count_calls
     def store(self, data: Union[str, bytes, int, float]) -> str:
         """Store data in a Redis data storage and returns the key"""
         key = str(uuid4())
